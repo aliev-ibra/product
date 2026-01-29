@@ -25,6 +25,8 @@ Follow this script exactly to verify all security requirements.
 - Check **Response Headers**:
     - `Strict-Transport-Security: max-age=31536000 ; includeSubDomains`
 
+curl -ki https://localhost:8443/
+
 ### 3. Authentication & Input Validation
 **Demonstrate:**
 1. Go to `/register`.

@@ -3,6 +3,7 @@ package com.example.lab10.controller;
 import com.example.lab10.dto.UserDTO;
 import com.example.lab10.model.User;
 import com.example.lab10.service.UserService;
+import com.example.lab10.util.LoggingUtils;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,7 +32,7 @@ public class RegistrationController {
     @PostMapping("/register")
     public String register(@Valid @ModelAttribute("user") UserDTO userDTO, BindingResult result) {
         if (result.hasErrors()) {
-            logger.warn("Validation failed during registration for user: {}", userDTO.getEmail());
+            logger.warn("Validation failed during registration for user: {}", LoggingUtils.maskEmail(userDTO.getEmail()));
             return "register";
         }
 
@@ -43,7 +44,7 @@ public class RegistrationController {
             // Role and Details handled in Service/Entity defaults
             
             userService.createUser(user);
-            logger.info("Registration successful for user: {}", user.getEmail());
+            logger.info("Registration successful for user: {}", LoggingUtils.maskEmail(user.getEmail()));
             
         } catch (Exception e) {
             logger.error("Registration failed", e);

@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +27,20 @@ public class SecurityConfig {
                         com.example.lab10.security.JwtAuthenticationFilter jwtAuthenticationFilter) {
                 this.userDetailsService = userDetailsService;
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        }
+
+        // H2 Console Security Filter Chain (Disables CSP for H2 interface)
+        @Bean
+        @org.springframework.core.annotation.Order(0)
+        public SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
+            http
+                .securityMatcher("/h2-console/**")
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .headers(headers -> headers
+                    .frameOptions(frame -> frame.sameOrigin())
+                );
+            return http.build();
         }
 
         // API Security Filter Chain (JWT)
@@ -52,20 +67,21 @@ public class SecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http
                 .csrf(csrf -> csrf
-                    .ignoringRequestMatchers("/h2-console/**", "/register") // Qeydiyyatı bloklamasın
+                    .ignoringRequestMatchers("/register")
                 )
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/register", "/login", "/h2-console/**", "/css/**").permitAll()
+                    .requestMatchers("/register", "/login", "/css/**").permitAll()
                     .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
-                    .frameOptions(frame -> frame.sameOrigin())
+                    .frameOptions(frame -> frame.sameOrigin()) // X-Frame-Options: SAMEORIGIN
                     .contentSecurityPolicy(csp -> csp
                         .policyDirectives("default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self' data:;")
                     )
                     .referrerPolicy(referrer -> referrer
                         .policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
                     )
+                    .xssProtection(xss -> xss.headerValue(org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                 )
                 .formLogin(form -> form
                     .loginPage("/login")

@@ -51,8 +51,9 @@ public class NoteService {
                 .orElseThrow(() -> new RuntimeException("Note not found"));
 
         User currentUser = getCurrentUser();
+        // Security: Return 404 instead of 403 to prevent information disclosure
         if (!note.getUserId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("You do not have permission to access this note");
+            throw new RuntimeException("Note not found");
         }
         return note;
     }

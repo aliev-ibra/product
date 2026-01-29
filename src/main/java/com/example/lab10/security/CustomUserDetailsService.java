@@ -2,6 +2,7 @@ package com.example.lab10.security;
 
 import com.example.lab10.model.User;
 import com.example.lab10.repository.UserRepository;
+import com.example.lab10.util.LoggingUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,15 +21,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        logger.info("CustomUserDetailsService: Load request received for email: {}", email);
+        logger.info("CustomUserDetailsService: Load request received for email: {}", LoggingUtils.maskEmail(email));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     logger.warn("CustomUserDetailsService: Authentication failed - User record missing for email: {}",
-                            email);
+                            LoggingUtils.maskEmail(email));
                     return new UsernameNotFoundException("Invalid credentials.");
                 });
 
-        logger.info("CustomUserDetailsService: User identity verified and authorities mapped for user: {}", email);
+        logger.info("CustomUserDetailsService: User identity verified and authorities mapped for user: {}", LoggingUtils.maskEmail(email));
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail()) // Use email as username
                 .password(user.getPassword())

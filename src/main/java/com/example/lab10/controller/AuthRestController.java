@@ -7,6 +7,7 @@ import com.example.lab10.model.User;
 import com.example.lab10.repository.UserRepository;
 import com.example.lab10.security.JwtUtils;
 import com.example.lab10.service.RefreshTokenService;
+import com.example.lab10.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,13 +26,40 @@ public class AuthRestController {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
+    private final UserService userService;
 
     public AuthRestController(AuthenticationManager authenticationManager, UserRepository userRepository,
-            JwtUtils jwtUtils, RefreshTokenService refreshTokenService) {
+            JwtUtils jwtUtils, RefreshTokenService refreshTokenService, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
+        this.userService = userService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO registerRequest) {
+        // Create new user
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(registerRequest.getPassword());
+        
+        // Save user (password will be encrypted in service)
+        User savedUser = userService.createUser(user);
+        
+        // Generate JWT token
+        String jwt = jwtUtils.generateJwtToken(savedUser.getEmail());
+        
+        // Create refresh token
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
+        
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                refreshToken.getToken(),
+                savedUser.getId(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getRole()));
     }
 
     @PostMapping("/login")

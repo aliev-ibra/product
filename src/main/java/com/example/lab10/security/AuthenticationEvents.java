@@ -1,5 +1,6 @@
 package com.example.lab10.security;
 
+import com.example.lab10.util.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -15,19 +16,23 @@ public class AuthenticationEvents {
 
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent event) {
-        logger.info("Login successful for user: {}", event.getAuthentication().getName());
+        logger.info("Login successful for user: {}", LoggingUtils.maskEmail(event.getAuthentication().getName()));
     }
 
     @EventListener
     public void onFailure(AbstractAuthenticationFailureEvent event) {
-        logger.warn("Login failed for user: {} - Reason: {}",
-                event.getAuthentication().getName(), event.getException().getMessage());
+        logger.warn("WARN: Failed login attempt for user: {}", 
+                LoggingUtils.maskEmail(event.getAuthentication().getName()));
     }
 
     // For Authorization failures (403) - Spring Security 6+
     @EventListener
     public void onAuthorizationDenied(AuthorizationDeniedEvent<?> event) {
-        logger.warn("Unauthorized access attempt - Result: {}",
-                event.getAuthorizationDecision());
+        String source = event.getSource() != null ? event.getSource().toString() : "Unknown";
+        String user = event.getAuthentication() != null && event.getAuthentication().get().getName() != null 
+            ? LoggingUtils.maskEmail(event.getAuthentication().get().getName()) 
+            : "Anonymous";
+        
+        logger.warn("WARN: Unauthorized access attempt to [{}] by user: {}", source, user);
     }
 }

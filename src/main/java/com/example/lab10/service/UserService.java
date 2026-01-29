@@ -21,7 +21,7 @@ public class UserService {
     }
 
     @Transactional
-    public void createUser(User user) {
+    public User createUser(User user) {
         // Hash the password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         
@@ -30,7 +30,7 @@ public class UserService {
             user.setDetails("{\"city\":\"Baku\", \"registration_date\":\"" + LocalDate.now() + "\"}");
         }
         
-        userRepository.save(user); // JPA handles persistence
+        return userRepository.save(user); // JPA handles persistence and returns saved entity
     }
 
     public Optional<User> findByEmail(String email) {

@@ -18,7 +18,7 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-        cache:maven: true
+        cache: maven
         
     - name: Run Tests
       # Runs all security and unit tests

@@ -333,12 +333,3 @@ A: `AuthenticationEvents.java` line 19 - `LoggingUtils.maskEmail()` masks sensit
 **If all YES → GO GET THAT 90/90! 🎯🚀**
 
 ---
-
-**GOOD LUCK! 🍀**
-
-**Remember:**
-- Stay calm
-- Follow the script
-- Show, don't tell
-- Watch the time
-- You've got this!
